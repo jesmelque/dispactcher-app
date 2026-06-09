@@ -8,13 +8,69 @@ import {
   FormControlLabel,
   Radio,
   Divider,
+  Alert,
 } from '@mui/material';
 
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
 import loginBg from '../assets/nemt-login.jpeg';
+
+import { login } from '../auth/authService';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
+  const { loginUser } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('dispatcher');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const data = await login(
+        email,
+        password
+      );
+
+      /*
+      Backend returns:
+      {
+        access,
+        refresh,
+        user
+      }
+      */
+
+      loginUser(data);
+
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err?.response?.data?.detail ||
+          err?.response?.data?.non_field_errors?.[0] ||
+          'Invalid email or password'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -22,12 +78,12 @@ export default function LoginPage() {
         minHeight: '100vh',
 
         background: `
-  linear-gradient(
-    rgba(18, 15, 45, .82),
-    rgba(7, 17, 31, .88)
-  ),
-  url(${loginBg})
-`,
+          linear-gradient(
+            rgba(18,15,45,.82),
+            rgba(7,17,31,.88)
+          ),
+          url(${loginBg})
+        `,
 
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -45,7 +101,6 @@ export default function LoginPage() {
         sx={{
           width: 500,
           maxWidth: '100%',
-
           p: 5,
 
           borderRadius: '28px',
@@ -60,14 +115,12 @@ export default function LoginPage() {
             '0 25px 60px rgba(0,0,0,.35)',
         }}
       >
-        {/* COMPANY */}
         <Typography
           sx={{
             color: '#F8A201',
             fontWeight: 800,
             fontSize: '2rem',
             textAlign: 'center',
-            letterSpacing: 1,
           }}
         >
           ATS
@@ -75,7 +128,7 @@ export default function LoginPage() {
 
         <Typography
           sx={{
-            color: '#FFFFFF',
+            color: '#fff',
             textAlign: 'center',
             fontWeight: 700,
             fontSize: '1.4rem',
@@ -91,7 +144,6 @@ export default function LoginPage() {
             textAlign: 'center',
             mt: 1,
             mb: 4,
-            fontSize: '.95rem',
           }}
         >
           NEMT Dispatch, Scheduling, Billing & Fleet Operations
@@ -104,25 +156,39 @@ export default function LoginPage() {
           }}
         />
 
-        {/* LOGIN FORM */}
+        {error && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+          >
+            {error}
+          </Alert>
+        )}
+
         <TextField
           fullWidth
           label="Email Address"
-          variant="outlined"
           margin="normal"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
         />
 
         <TextField
           fullWidth
           label="Password"
           type="password"
-          variant="outlined"
           margin="normal"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
         />
 
         <Typography
           sx={{
-            color: '#FFFFFF',
+            color: '#fff',
             mt: 3,
             mb: 1,
             fontWeight: 600,
@@ -131,9 +197,14 @@ export default function LoginPage() {
           Login Role
         </Typography>
 
-        <RadioGroup defaultValue="dispatch">
+        <RadioGroup
+          value={role}
+          onChange={(e) =>
+            setRole(e.target.value)
+          }
+        >
           <FormControlLabel
-            value="dispatch"
+            value="dispatcher"
             control={<Radio />}
             label="Dispatch Operations"
           />
@@ -154,7 +225,8 @@ export default function LoginPage() {
         <Button
           fullWidth
           variant="contained"
-          onClick={() => navigate('/dashboard')}
+          onClick={handleLogin}
+          disabled={loading}
           sx={{
             mt: 4,
             height: 56,
@@ -162,77 +234,15 @@ export default function LoginPage() {
             borderRadius: 3,
 
             fontWeight: 700,
-            fontSize: '1rem',
 
             background:
               'linear-gradient(90deg,#6D5DF6,#8B5CF6)',
-
-            '&:hover': {
-              background:
-                'linear-gradient(90deg,#5B4BE6,#7C4DFF)',
-            },
           }}
         >
-          Sign In
+          {loading
+            ? 'Signing In...'
+            : 'Sign In'}
         </Button>
-
-        {/* PLATFORM FEATURES */}
-        <Box
-          sx={{
-            mt: 4,
-            pt: 3,
-            borderTop: '1px solid rgba(255,255,255,.08)',
-          }}
-        >
-          <Typography
-            sx={{
-              color: '#B8C5D6',
-              fontSize: '.85rem',
-              mb: 1,
-            }}
-          >
-            ✓ Trip Scheduling
-          </Typography>
-
-          <Typography
-            sx={{
-              color: '#B8C5D6',
-              fontSize: '.85rem',
-              mb: 1,
-            }}
-          >
-            ✓ Dispatch Management
-          </Typography>
-
-          <Typography
-            sx={{
-              color: '#B8C5D6',
-              fontSize: '.85rem',
-              mb: 1,
-            }}
-          >
-            ✓ Live Driver Tracking
-          </Typography>
-
-          <Typography
-            sx={{
-              color: '#B8C5D6',
-              fontSize: '.85rem',
-              mb: 1,
-            }}
-          >
-            ✓ Billing & Claims Processing
-          </Typography>
-
-          <Typography
-            sx={{
-              color: '#B8C5D6',
-              fontSize: '.85rem',
-            }}
-          >
-            ✓ Fleet Operations & Reporting
-          </Typography>
-        </Box>
       </Paper>
     </Box>
   );

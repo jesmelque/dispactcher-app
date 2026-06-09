@@ -93,4 +93,26 @@ FINANCE
 | Integrations        | ✅     | ❌        | ❌       |
 
 
+# Workflow
 
+Client books trip
+        ↓
+Trip received
+        ↓
+Dispatcher reviews
+        ↓
+Accept OR Reject
+        ↓
+Payment processed
+        ↓
+Reserved
+        ↓
+Assign Driver
+        ↓
+Driver Notified
+        ↓
+Pickup
+        ↓
+In Transit
+        ↓
+Completed
