@@ -44,7 +44,7 @@ export default function App() {
 
   const selected = location.pathname.replace('/', '') || 'dashboard';
 
-  // LOGIN PAGE - NO DRAWER
+  // LOGIN PAGE 
   if (location.pathname === '/') {
     return (
       <Routes>
